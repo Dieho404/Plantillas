@@ -1,0 +1,994 @@
+<!DOCTYPE html>
+<html lang="es" id="html-root">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ModernUI - Soluciones Web Profesionales</title>
+    <!-- Tailwind CSS para diseño rápido y moderno -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <!-- FontAwesome para iconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; scroll-behavior: smooth; }
+        .hero-gradient {
+            background: radial-gradient(circle at top right, rgba(79, 70, 229, 0.12), transparent 50%),
+                        radial-gradient(circle at bottom left, rgba(147, 51, 234, 0.08), transparent 50%);
+        }
+        .custom-shadow {
+            box-shadow: 0 10px 30px -5px rgba(79, 70, 229, 0.1);
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased selection:bg-indigo-500 selection:text-white">
+
+    <!-- Notificación / Caja de Mensajes personalizada (sin usar alert) -->
+    <div id="toast" class="fixed bottom-5 right-5 z-50 transform translate-y-32 opacity-0 transition-all duration-300 bg-slate-900 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 border border-slate-700">
+        <i id="toast-icon" class="fa-solid fa-circle-check text-emerald-400 text-xl"></i>
+        <div>
+            <h5 id="toast-title" class="font-bold text-sm">¡Éxito!</h5>
+            <p id="toast-msg" class="text-xs text-slate-300">Mensaje enviado correctamente.</p>
+        </div>
+    </div>
+
+    <!-- 1. Barra de Navegación Fija -->
+    <header class="fixed top-0 left-0 right-0 z-40 bg-white/90 backdrop-blur-md border-b border-slate-100 transition-all duration-300">
+        <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <div class="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-indigo-500/30">
+                    M
+                </div>
+                <span class="text-xl font-bold tracking-tight text-slate-900">Modern<span class="text-indigo-600">UI</span></span>
+            </div>
+
+            <!-- Enlaces de Navegación -->
+            <nav class="hidden lg:flex items-center gap-8 font-medium text-slate-600 text-sm">
+                <a href="#inicio" data-i18n="nav_inicio" class="hover:text-indigo-600 transition-colors">Inicio</a>
+                <a href="#servicios" data-i18n="nav_servicios" class="hover:text-indigo-600 transition-colors">Servicios</a>
+                <a href="#portafolio" data-i18n="nav_portafolio" class="hover:text-indigo-600 transition-colors">Portafolio</a>
+                <a href="#nosotros" data-i18n="nav_nosotros" class="hover:text-indigo-600 transition-colors">Nosotros</a>
+                <a href="#testimonios" data-i18n="nav_testimonios" class="hover:text-indigo-600 transition-colors">Testimonios</a>
+                <a href="#contacto" data-i18n="nav_contacto" class="hover:text-indigo-600 transition-colors">Contacto</a>
+            </nav>
+
+            <div class="hidden lg:flex items-center gap-4">
+                <!-- Selector de Idioma -->
+                <div class="relative">
+                    <select id="language-selector" onchange="changeLanguage(this.value)" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-sm px-3 py-2 rounded-xl border border-slate-200 outline-none cursor-pointer transition-colors">
+                        <option value="es">🇪🇸 ES</option>
+                        <option value="en">🇺🇸 EN</option>
+                        <option value="fr">🇫🇷 FR</option>
+                        <option value="de">🇩🇪 DE</option>
+                    </select>
+                </div>
+
+                <button onclick="showToast('Inicio de sesión', 'Abriendo pasarela de acceso seguro...')" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm px-5 py-2.5 rounded-xl shadow-lg shadow-indigo-500/25 transition-all transform hover:-translate-y-0.5" data-i18n="btn_empezar">
+                    Empezar Gratis
+                </button>
+            </div>
+
+            <!-- Botón menú móvil -->
+            <button id="menu-btn" class="lg:hidden text-2xl text-slate-700 focus:outline-none">
+                <i class="fa-solid fa-bars"></i>
+            </button>
+        </div>
+
+        <!-- Menú Móvil Desplegable -->
+        <div id="mobile-menu" class="hidden lg:hidden bg-white border-b border-slate-100 px-6 py-4 space-y-3">
+            <div class="flex items-center justify-between pb-2 border-b border-slate-100">
+                <span class="text-xs font-bold text-slate-400 uppercase" data-i18n="nav_idioma">Idioma</span>
+                <select id="mobile-language-selector" onchange="changeLanguage(this.value)" class="bg-slate-100 text-slate-700 font-semibold text-xs px-2 py-1 rounded-lg border border-slate-200 outline-none">
+                    <option value="es">Español</option>
+                    <option value="en">English</option>
+                    <option value="fr">Français</option>
+                    <option value="de">Deutsch</option>
+                </select>
+            </div>
+            <a href="#inicio" onclick="toggleMobileMenu()" class="block text-slate-600 font-medium py-1" data-i18n="nav_inicio">Inicio</a>
+            <a href="#servicios" onclick="toggleMobileMenu()" class="block text-slate-600 font-medium py-1" data-i18n="nav_servicios">Servicios</a>
+            <a href="#portafolio" onclick="toggleMobileMenu()" class="block text-slate-600 font-medium py-1" data-i18n="nav_portafolio">Portafolio</a>
+            <a href="#nosotros" onclick="toggleMobileMenu()" class="block text-slate-600 font-medium py-1" data-i18n="nav_nosotros">Nosotros</a>
+            <a href="#testimonios" onclick="toggleMobileMenu()" class="block text-slate-600 font-medium py-1" data-i18n="nav_testimonios">Testimonios</a>
+            <a href="#contacto" onclick="toggleMobileMenu()" class="block text-slate-600 font-medium py-1" data-i18n="nav_contacto">Contacto</a>
+            <div class="pt-2">
+                <button onclick="showToast('Inicio de sesión', 'Abriendo pasarela de acceso seguro...')" class="w-full bg-indigo-600 text-white py-2.5 rounded-xl font-semibold text-sm" data-i18n="btn_empezar">Empezar Gratis</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- 2. Sección Hero (Inicio) -->
+    <section id="inicio" class="pt-32 pb-20 lg:pt-44 lg:pb-32 hero-gradient overflow-hidden">
+        <div class="max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            <div class="space-y-6 text-center lg:text-left">
+                <div class="inline-flex items-center gap-2 bg-indigo-50 border border-indigo-100 text-indigo-700 px-4 py-1.5 rounded-full text-sm font-semibold">
+                    <i class="fa-solid fa-sparkles"></i> <span data-i18n="hero_tag">Líderes en desarrollo web moderno</span>
+                </div>
+                <h1 class="text-4xl lg:text-6xl font-extrabold text-slate-950 tracking-tight leading-tight">
+                    <span data-i18n="hero_title_1">Transforma tu visión digital en</span> <span class="text-indigo-600 underline decoration-indigo-300 decoration-wavy" data-i18n="hero_title_2">realidad pura</span>
+                </h1>
+                <p class="text-lg text-slate-600 max-w-xl mx-auto lg:mx-0" data-i18n="hero_desc">
+                    Creamos experiencias web de alta gama, escalables y optimizadas para maximizar conversiones y cautivar a tu audiencia.
+                </p>
+                <div class="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 pt-2">
+                    <a href="#contacto" class="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-8 py-4 rounded-xl shadow-xl shadow-indigo-500/30 transition-all transform hover:-translate-y-1 text-center" data-i18n="hero_btn_primary">
+                        Comenzar Proyecto
+                    </a>
+                    <a href="#portafolio" class="w-full sm:w-auto bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 font-semibold px-8 py-4 rounded-xl transition-all flex items-center justify-center gap-2 shadow-sm" data-i18n="hero_btn_secondary">
+                        <i class="fa-solid fa-play text-indigo-600"></i> Ver Proyectos
+                    </a>
+                </div>
+                <div class="pt-6 flex items-center justify-center lg:justify-start gap-6 text-sm text-slate-500">
+                    <div class="flex items-center gap-2"><i class="fa-solid fa-check text-emerald-500 font-bold"></i> <span data-i18n="hero_feat_1">Soporte 24/7</span></div>
+                    <div class="flex items-center gap-2"><i class="fa-solid fa-check text-emerald-500 font-bold"></i> <span data-i18n="hero_feat_2">Garantía de rendimiento</span></div>
+                </div>
+            </div>
+
+            <div class="relative flex justify-center">
+                <div class="absolute -inset-2 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-3xl blur-2xl opacity-25 animate-pulse"></div>
+                <div class="relative bg-white p-6 rounded-3xl shadow-2xl border border-slate-100 w-full max-w-lg">
+                    <div class="bg-slate-900 rounded-2xl p-6 text-white space-y-4 shadow-inner">
+                        <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+                            <div class="flex items-center gap-2">
+                                <div class="w-3 h-3 rounded-full bg-red-500"></div>
+                                <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
+                                <div class="w-3 h-3 rounded-full bg-emerald-500"></div>
+                            </div>
+                            <span class="text-xs text-slate-400 font-mono">architecture.js</span>
+                        </div>
+                        <div class="space-y-3 font-mono text-sm">
+                            <div class="text-indigo-400">const <span class="text-purple-300">ModernApp</span> = {</div>
+                            <div class="pl-4 text-slate-300">performance: <span class="text-emerald-400">99.9%</span>,</div>
+                            <div class="pl-4 text-slate-300">responsive: <span class="text-amber-300">true</span>,</div>
+                            <div class="pl-4 text-slate-300">security: <span class="text-emerald-400">"Enterprise Grade"</span></div>
+                            <div class="text-indigo-400">};</div>
+                        </div>
+                        <div class="pt-4 flex items-center justify-between text-xs text-slate-400 border-t border-slate-800/80">
+                            <span data-i18n="hero_code_status">Compilado de manera óptima</span>
+                            <span class="text-emerald-400 font-bold">v3.5.2</span>
+                        </div>
+                    </div>
+                    <div class="mt-6 grid grid-cols-2 gap-4">
+                        <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100 flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold">
+                                <i class="fa-solid fa-users"></i>
+                            </div>
+                            <div>
+                                <h5 class="font-bold text-slate-900 text-base">+1,500</h5>
+                                <p class="text-xs text-slate-500" data-i18n="hero_stat_1">Clientes Felices</p>
+                            </div>
+                        </div>
+                        <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100 flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl bg-purple-100 text-purple-600 flex items-center justify-center font-bold">
+                                <i class="fa-solid fa-award"></i>
+                            </div>
+                            <div>
+                                <h5 class="font-bold text-slate-900 text-base">99.8%</h5>
+                                <p class="text-xs text-slate-500" data-i18n="hero_stat_2">Conversión</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 3. Sección de Servicios -->
+    <section id="servicios" class="py-24 bg-white">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="text-center max-w-2xl mx-auto space-y-4 mb-16">
+                <span class="text-xs font-bold tracking-widest uppercase text-indigo-600 bg-indigo-50 py-1.5 px-4 rounded-full inline-block" data-i18n="serv_badge">Nuestros Servicios</span>
+                <h2 class="text-3xl lg:text-4xl font-extrabold text-slate-950" data-i18n="serv_title">Soluciones diseñadas para tu crecimiento digital</h2>
+                <p class="text-slate-600 text-base" data-i18n="serv_desc">Combinamos diseño de vanguardia con ingeniería robusta para crear productos digitales excepcionales.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Tarjeta 1 -->
+                <div class="p-8 rounded-3xl bg-slate-50 border border-slate-100 hover:border-indigo-200 hover:bg-white transition-all duration-300 hover:shadow-2xl group">
+                    <div class="w-14 h-14 rounded-2xl bg-indigo-100 text-indigo-600 flex items-center justify-center text-2xl font-bold mb-6 group-hover:bg-indigo-600 group-hover:text-white transition-colors">
+                        <i class="fa-solid fa-code"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-slate-900 mb-3" data-i18n="serv_1_title">Desarrollo Web Full-Stack</h3>
+                    <p class="text-slate-600 leading-relaxed text-sm" data-i18n="serv_1_desc">Aplicaciones web dinámicas y escalables creadas con tecnologías modernas de alto rendimiento.</p>
+                </div>
+
+                <!-- Tarjeta 2 -->
+                <div class="p-8 rounded-3xl bg-slate-50 border border-slate-100 hover:border-indigo-200 hover:bg-white transition-all duration-300 hover:shadow-2xl group">
+                    <div class="w-14 h-14 rounded-2xl bg-purple-100 text-purple-600 flex items-center justify-center text-2xl font-bold mb-6 group-hover:bg-purple-600 group-hover:text-white transition-colors">
+                        <i class="fa-solid fa-paintbrush"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-slate-900 mb-3" data-i18n="serv_2_title">Diseño UI/UX Avanzado</h3>
+                    <p class="text-slate-600 leading-relaxed text-sm" data-i18n="serv_2_desc">Interfaces intuitivas y atractivas orientadas a enamorar a tus usuarios y elevar la retención.</p>
+                </div>
+
+                <!-- Tarjeta 3 -->
+                <div class="p-8 rounded-3xl bg-slate-50 border border-slate-100 hover:border-indigo-200 hover:bg-white transition-all duration-300 hover:shadow-2xl group">
+                    <div class="w-14 h-14 rounded-2xl bg-blue-100 text-blue-600 flex items-center justify-center text-2xl font-bold mb-6 group-hover:bg-blue-600 group-hover:text-white transition-colors">
+                        <i class="fa-solid fa-chart-line"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-slate-900 mb-3" data-i18n="serv_3_title">Optimización SEO y Velocidad</h3>
+                    <p class="text-slate-600 leading-relaxed text-sm" data-i18n="serv_3_desc">Posicionamiento en buscadores y tiempos de carga instantáneos para superar a tu competencia.</p>
+                </div>
+
+                <!-- Tarjeta 4 -->
+                <div class="p-8 rounded-3xl bg-slate-50 border border-slate-100 hover:border-indigo-200 hover:bg-white transition-all duration-300 hover:shadow-2xl group">
+                    <div class="w-14 h-14 rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center text-2xl font-bold mb-6 group-hover:bg-emerald-600 group-hover:text-white transition-colors">
+                        <i class="fa-solid fa-cart-shopping"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-slate-900 mb-3" data-i18n="serv_4_title">Comercio Electrónico</h3>
+                    <p class="text-slate-600 leading-relaxed text-sm" data-i18n="serv_4_desc">Tiendas online robustas con pasarelas de pago seguras y gestión inteligente de inventarios.</p>
+                </div>
+
+                <!-- Tarjeta 5 -->
+                <div class="p-8 rounded-3xl bg-slate-50 border border-slate-100 hover:border-indigo-200 hover:bg-white transition-all duration-300 hover:shadow-2xl group">
+                    <div class="w-14 h-14 rounded-2xl bg-amber-100 text-amber-600 flex items-center justify-center text-2xl font-bold mb-6 group-hover:bg-amber-600 group-hover:text-white transition-colors">
+                        <i class="fa-solid fa-mobile-screen-button"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-slate-900 mb-3" data-i18n="serv_5_title">Apps Multiplataforma</h3>
+                    <p class="text-slate-600 leading-relaxed text-sm" data-i18n="serv_5_desc">Desarrollo móvil nativo y multiplataforma impecable tanto para iOS como para Android.</p>
+                </div>
+
+                <!-- Tarjeta 6 -->
+                <div class="p-8 rounded-3xl bg-slate-50 border border-slate-100 hover:border-indigo-200 hover:bg-white transition-all duration-300 hover:shadow-2xl group">
+                    <div class="w-14 h-14 rounded-2xl bg-rose-100 text-rose-600 flex items-center justify-center text-2xl font-bold mb-6 group-hover:bg-rose-600 group-hover:text-white transition-colors">
+                        <i class="fa-solid fa-headset"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-slate-900 mb-3" data-i18n="serv_6_title">Consultoría & Soporte</h3>
+                    <p class="text-slate-600 leading-relaxed text-sm" data-i18n="serv_6_desc">Asesoría tecnológica continua por parte de ingenieros expertos para garantizar el éxito de tu proyecto.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 4. Sección de Portafolio / Proyectos con Filtros Interactivos -->
+    <section id="portafolio" class="py-24 bg-slate-50">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="text-center max-w-2xl mx-auto space-y-4 mb-12">
+                <span class="text-xs font-bold tracking-widest uppercase text-indigo-600 bg-indigo-50 py-1.5 px-4 rounded-full inline-block" data-i18n="port_badge">Nuestro Trabajo</span>
+                <h2 class="text-3xl lg:text-4xl font-extrabold text-slate-950" data-i18n="port_title">Proyectos recientes destacados</h2>
+                <p class="text-slate-600 text-base" data-i18n="port_desc">Explora algunos de nuestros casos de éxito desarrollados para marcas líderes a nivel global.</p>
+            </div>
+
+            <!-- Botones de Filtro -->
+            <div class="flex flex-wrap items-center justify-center gap-3 mb-12">
+                <button onclick="filterProjects('all')" class="filter-btn active bg-indigo-600 text-white font-semibold text-sm px-6 py-2.5 rounded-xl shadow-md transition-all" data-i18n="filter_all">Todos</button>
+                <button onclick="filterProjects('web')" class="filter-btn bg-white hover:bg-slate-100 text-slate-700 font-semibold text-sm px-6 py-2.5 rounded-xl border border-slate-200 transition-all" data-i18n="filter_web">Desarrollo Web</button>
+                <button onclick="filterProjects('ui')" class="filter-btn bg-white hover:bg-slate-100 text-slate-700 font-semibold text-sm px-6 py-2.5 rounded-xl border border-slate-200 transition-all" data-i18n="filter_ui">Diseño UI/UX</button>
+                <button onclick="filterProjects('mobile')" class="filter-btn bg-white hover:bg-slate-100 text-slate-700 font-semibold text-sm px-6 py-2.5 rounded-xl border border-slate-200 transition-all" data-i18n="filter_mobile">Móvil</button>
+            </div>
+
+            <!-- Contenedor de Proyectos -->
+            <div id="projects-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Proyecto 1 -->
+                <div class="project-card bg-white rounded-3xl overflow-hidden border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-300" data-category="web">
+                    <div class="h-52 bg-indigo-900 relative overflow-hidden flex items-center justify-center group">
+                        <div class="absolute inset-0 bg-gradient-to-tr from-indigo-900 to-purple-800 opacity-90"></div>
+                        <div class="relative z-10 text-white text-center px-6">
+                            <span class="text-xs uppercase font-mono tracking-widest bg-indigo-600/60 px-3 py-1 rounded-full">SaaS Cloud</span>
+                            <h4 class="text-xl font-bold mt-2">Nexus Analytics</h4>
+                        </div>
+                        <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
+                            <button onclick="showToast('Proyecto Nexus', 'Abriendo vista previa en vivo...')" class="w-10 h-10 rounded-full bg-white text-slate-900 flex items-center justify-center font-bold shadow-lg hover:scale-110 transition-transform"><i class="fa-solid fa-arrow-up-right-from-square"></i></button>
+                        </div>
+                    </div>
+                    <div class="p-6 space-y-3">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-bold text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-lg">React & Node.js</span>
+                            <span class="text-xs text-slate-400">2026</span>
+                        </div>
+                        <h4 class="text-lg font-bold text-slate-900">Plataforma de Analítica en Tiempo Real</h4>
+                        <p class="text-slate-600 text-xs leading-relaxed">Dashboard interactivo con métricas financieras corporativas y visualización avanzada de datos.</p>
+                    </div>
+                </div>
+
+                <!-- Proyecto 2 -->
+                <div class="project-card bg-white rounded-3xl overflow-hidden border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-300" data-category="ui">
+                    <div class="h-52 bg-purple-900 relative overflow-hidden flex items-center justify-center group">
+                        <div class="absolute inset-0 bg-gradient-to-tr from-purple-900 to-pink-800 opacity-90"></div>
+                        <div class="relative z-10 text-white text-center px-6">
+                            <span class="text-xs uppercase font-mono tracking-widest bg-purple-600/60 px-3 py-1 rounded-full">Fintech UX</span>
+                            <h4 class="text-xl font-bold mt-2">Aura Wallet</h4>
+                        </div>
+                        <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
+                            <button onclick="showToast('Proyecto Aura', 'Abriendo vista previa en vivo...')" class="w-10 h-10 rounded-full bg-white text-slate-900 flex items-center justify-center font-bold shadow-lg hover:scale-110 transition-transform"><i class="fa-solid fa-arrow-up-right-from-square"></i></button>
+                        </div>
+                    </div>
+                    <div class="p-6 space-y-3">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-bold text-purple-600 bg-purple-50 px-2.5 py-1 rounded-lg">Figma & Tailwind</span>
+                            <span class="text-xs text-slate-400">2026</span>
+                        </div>
+                        <h4 class="text-lg font-bold text-slate-900">Rediseño Complejo de App Bancaria</h4>
+                        <p class="text-slate-600 text-xs leading-relaxed">Nueva experiencia de usuario centrada en la simplicidad para transacciones internacionales instantáneas.</p>
+                    </div>
+                </div>
+
+                <!-- Proyecto 3 -->
+                <div class="project-card bg-white rounded-3xl overflow-hidden border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-300" data-category="mobile">
+                    <div class="h-52 bg-blue-900 relative overflow-hidden flex items-center justify-center group">
+                        <div class="absolute inset-0 bg-gradient-to-tr from-blue-900 to-indigo-800 opacity-90"></div>
+                        <div class="relative z-10 text-white text-center px-6">
+                            <span class="text-xs uppercase font-mono tracking-widest bg-blue-600/60 px-3 py-1 rounded-full">Mobile App</span>
+                            <h4 class="text-xl font-bold mt-2">Pulse Fitness</h4>
+                        </div>
+                        <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
+                            <button onclick="showToast('Proyecto Pulse', 'Abriendo vista previa en vivo...')" class="w-10 h-10 rounded-full bg-white text-slate-900 flex items-center justify-center font-bold shadow-lg hover:scale-110 transition-transform"><i class="fa-solid fa-arrow-up-right-from-square"></i></button>
+                        </div>
+                    </div>
+                    <div class="p-6 space-y-3">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-bold text-blue-600 bg-blue-50 px-2.5 py-1 rounded-lg">Flutter & Firebase</span>
+                            <span class="text-xs text-slate-400">2025</span>
+                        </div>
+                        <h4 class="text-lg font-bold text-slate-900">App de Salud y Entrenamiento Personal</h4>
+                        <p class="text-slate-600 text-xs leading-relaxed">Seguimiento biométrico en tiempo real sincronizado con relojes inteligentes y rutinas guiadas.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 5. Sección "Acerca de nosotros" -->
+    <section id="nosotros" class="py-24 bg-white overflow-hidden">
+        <div class="max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+            <div class="space-y-6">
+                <span class="text-xs font-bold tracking-widest uppercase text-indigo-600 bg-indigo-50 py-1.5 px-4 rounded-full inline-block" data-i18n="about_badge">Sobre Nosotros</span>
+                <h2 class="text-3xl lg:text-4xl font-extrabold text-slate-950" data-i18n="about_title">Innovación, pasión y calidad sin compromisos</h2>
+                <p class="text-slate-600 leading-relaxed text-base" data-i18n="about_desc">
+                    Fundada en 2020, ModernUI reúne a un equipo multidisciplinario de ingenieros, diseñadores y estrategas digitales comprometidos con impulsar el éxito de empresas ambiciosas alrededor del mundo.
+                </p>
+                <div class="grid grid-cols-2 gap-6 pt-4">
+                    <div class="border-l-4 border-indigo-600 pl-4">
+                        <h4 class="text-3xl font-extrabold text-slate-950">+150</h4>
+                        <p class="text-xs text-slate-500 uppercase tracking-wider font-semibold mt-1" data-i18n="about_stat_1">Proyectos Exitosos</p>
+                    </div>
+                    <div class="border-l-4 border-purple-600 pl-4">
+                        <h4 class="text-3xl font-extrabold text-slate-950">99%</h4>
+                        <p class="text-xs text-slate-500 uppercase tracking-wider font-semibold mt-1" data-i18n="about_stat_2">Satisfacción Total</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div class="space-y-4">
+                    <div class="bg-indigo-50 p-6 rounded-3xl border border-indigo-100 text-center">
+                        <div class="w-12 h-12 bg-indigo-600 text-white rounded-2xl mx-auto flex items-center justify-center text-xl mb-4 font-bold">
+                            <i class="fa-solid fa-bullseye"></i>
+                        </div>
+                        <h4 class="font-bold text-slate-900 text-lg mb-2" data-i18n="about_val_1_title">Misión</h4>
+                        <p class="text-xs text-slate-600 leading-relaxed" data-i18n="about_val_1_desc">Democratizar el acceso a tecnología web de nivel mundial para empresas de todos los tamaños.</p>
+                    </div>
+                    <div class="bg-slate-900 text-white p-6 rounded-3xl text-center">
+                        <div class="w-12 h-12 bg-indigo-500 text-white rounded-2xl mx-auto flex items-center justify-center text-xl mb-4 font-bold">
+                            <i class="fa-solid fa-eye"></i>
+                        </div>
+                        <h4 class="font-bold text-white text-lg mb-2" data-i18n="about_val_2_title">Visión</h4>
+                        <p class="text-xs text-slate-300 leading-relaxed" data-i18n="about_val_2_desc">Ser el referente global en consultoría y desarrollo de experiencias web inmersivas.</p>
+                    </div>
+                </div>
+                <div class="space-y-4 pt-8">
+                    <div class="bg-purple-50 p-6 rounded-3xl border border-purple-100 text-center">
+                        <div class="w-12 h-12 bg-purple-600 text-white rounded-2xl mx-auto flex items-center justify-center text-xl mb-4 font-bold">
+                            <i class="fa-solid fa-gem"></i>
+                        </div>
+                        <h4 class="font-bold text-slate-900 text-lg mb-2" data-i18n="about_val_3_title">Valores</h4>
+                        <p class="text-xs text-slate-600 leading-relaxed" data-i18n="about_val_3_desc">Transparencia radical, excelencia técnica y obsesión por la satisfacción del cliente.</p>
+                    </div>
+                    <div class="bg-emerald-50 p-6 rounded-3xl border border-emerald-100 text-center">
+                        <div class="w-12 h-12 bg-emerald-600 text-white rounded-2xl mx-auto flex items-center justify-center text-xl mb-4 font-bold">
+                            <i class="fa-solid fa-shield-heart"></i>
+                        </div>
+                        <h4 class="font-bold text-slate-900 text-lg mb-2" data-i18n="about_val_4_title">Calidad</h4>
+                        <p class="text-xs text-slate-600 leading-relaxed" data-i18n="about_val_4_desc">Rigurosos estándares de pruebas y control de calidad en cada línea de código.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 6. Sección de Testimonios / Reseñas -->
+    <section id="testimonios" class="py-24 bg-slate-50">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="text-center max-w-2xl mx-auto space-y-4 mb-16">
+                <span class="text-xs font-bold tracking-widest uppercase text-indigo-600 bg-indigo-50 py-1.5 px-4 rounded-full inline-block" data-i18n="test_badge">Testimonios</span>
+                <h2 class="text-3xl lg:text-4xl font-extrabold text-slate-950" data-i18n="test_title">Lo que dicen nuestros clientes</h2>
+                <p class="text-slate-600 text-base" data-i18n="test_desc">Historias reales de éxito y transformación digital con nuestros servicios.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- Testimonio 1 -->
+                <div class="bg-white p-8 rounded-3xl border border-slate-100 shadow-sm relative flex flex-col justify-between">
+                    <div>
+                        <div class="flex text-amber-400 gap-1 mb-4 text-sm">
+                            <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                        </div>
+                        <p class="text-slate-600 text-sm leading-relaxed mb-6" data-i18n="test_1_text">"Trabajar con ModernUI ha sido un punto de inflexión para nuestra empresa. Nuestra nueva plataforma triplicó las conversiones en solo un mes."</p>
+                    </div>
+                    <div class="flex items-center gap-4 pt-4 border-t border-slate-100">
+                        <div class="w-12 h-12 rounded-full bg-indigo-600 text-white font-bold flex items-center justify-center">CM</div>
+                        <div>
+                            <h5 class="font-bold text-slate-900 text-sm">Carlos Mendoza</h5>
+                            <p class="text-xs text-slate-500" data-i18n="test_1_role">CEO en FinTech Labs</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Testimonio 2 -->
+                <div class="bg-white p-8 rounded-3xl border border-slate-100 shadow-sm relative flex flex-col justify-between">
+                    <div>
+                        <div class="flex text-amber-400 gap-1 mb-4 text-sm">
+                            <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                        </div>
+                        <p class="text-slate-600 text-sm leading-relaxed mb-6" data-i18n="test_2_text">"La velocidad de entrega y la atención al detalle superaron todas nuestras expectativas. Recomiendo sus servicios al 100%."</p>
+                    </div>
+                    <div class="flex items-center gap-4 pt-4 border-t border-slate-100">
+                        <div class="w-12 h-12 rounded-full bg-purple-600 text-white font-bold flex items-center justify-center">SL</div>
+                        <div>
+                            <h5 class="font-bold text-slate-900 text-sm">Sophie Laurent</h5>
+                            <p class="text-xs text-slate-500" data-i18n="test_2_role">Directora de Arte en ParisMedia</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Testimonio 3 -->
+                <div class="bg-white p-8 rounded-3xl border border-slate-100 shadow-sm relative flex flex-col justify-between">
+                    <div>
+                        <div class="flex text-amber-400 gap-1 mb-4 text-sm">
+                            <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                        </div>
+                        <p class="text-slate-600 text-sm leading-relaxed mb-6" data-i18n="test_3_text">"El soporte multilingüe y el diseño responsivo impecable nos permitieron expandirnos al mercado europeo sin fricciones técnicas."</p>
+                    </div>
+                    <div class="flex items-center gap-4 pt-4 border-t border-slate-100">
+                        <div class="w-12 h-12 rounded-full bg-emerald-600 text-white font-bold flex items-center justify-center">HW</div>
+                        <div>
+                            <h5 class="font-bold text-slate-900 text-sm">Hans Weber</h5>
+                            <p class="text-xs text-slate-500" data-i18n="test_3_role">CTO en Berlin Solutions</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 7. Sección de Contacto -->
+    <section id="contacto" class="py-24 bg-white">
+        <div class="max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+            <div class="space-y-6">
+                <span class="text-xs font-bold tracking-widest uppercase text-indigo-600 bg-indigo-50 py-1.5 px-4 rounded-full inline-block" data-i18n="cont_badge">Contacto</span>
+                <h2 class="text-3xl lg:text-4xl font-extrabold text-slate-950" data-i18n="cont_title">Hablemos sobre tu próximo gran proyecto</h2>
+                <p class="text-slate-600 leading-relaxed text-base" data-i18n="cont_desc">
+                    ¿Tienes una idea en mente? Completa el formulario y uno de nuestros expertos se pondrá en contacto contigo en menos de 2 horas.
+                </p>
+
+                <div class="space-y-4 pt-4">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-lg">
+                            <i class="fa-solid fa-envelope"></i>
+                        </div>
+                        <div>
+                            <h5 class="text-xs font-bold text-slate-400 uppercase tracking-wider" data-i18n="cont_email_label">Correo Electrónico</h5>
+                            <p class="text-slate-900 font-semibold text-sm">contacto@modernui.com</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-lg">
+                            <i class="fa-solid fa-phone"></i>
+                        </div>
+                        <div>
+                            <h5 class="text-xs font-bold text-slate-400 uppercase tracking-wider" data-i18n="cont_phone_label">Teléfono</h5>
+                            <p class="text-slate-900 font-semibold text-sm">+34 900 123 456</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-lg">
+                            <i class="fa-solid fa-location-dot"></i>
+                        </div>
+                        <div>
+                            <h5 class="text-xs font-bold text-slate-400 uppercase tracking-wider" data-i18n="cont_loc_label">Ubicación</h5>
+                            <p class="text-slate-900 font-semibold text-sm">Paseo de la Castellana 45, Madrid</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Formulario Funcional con Simulación -->
+            <div class="bg-slate-50 p-8 lg:p-10 rounded-3xl border border-slate-100 shadow-lg">
+                <form onsubmit="handleContactSubmit(event)" class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2" data-i18n="form_name">Nombre Completo</label>
+                        <input type="text" id="form-name" required placeholder="Ej. Ana Gómez" class="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-slate-800 text-sm focus:outline-none focus:border-indigo-600 transition-colors">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2" data-i18n="form_email">Correo Electrónico</label>
+                        <input type="email" id="form-email" required placeholder="ana@empresa.com" class="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-slate-800 text-sm focus:outline-none focus:border-indigo-600 transition-colors">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2" data-i18n="form_message">Mensaje</label>
+                        <textarea id="form-msg" required rows="4" placeholder="Cuéntanos sobre los requerimientos de tu proyecto..." class="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-slate-800 text-sm focus:outline-none focus:border-indigo-600 transition-colors resize-none"></textarea>
+                    </div>
+                    <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-4 rounded-xl shadow-lg shadow-indigo-500/25 transition-all text-sm" data-i18n="form_btn">
+                        Enviar Mensaje
+                    </button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- 8. Pie de Página (Footer) -->
+    <footer class="bg-slate-950 text-slate-400 py-16 border-t border-slate-900">
+        <div class="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
+            <div class="space-y-4 md:col-span-1">
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center text-white font-bold text-lg">M</div>
+                    <span class="text-lg font-bold text-white tracking-tight">ModernUI</span>
+                </div>
+                <p class="text-xs text-slate-400 leading-relaxed" data-i18n="footer_desc">Construyendo el futuro de la web con diseño impecable y código de alto rendimiento.</p>
+                <div class="flex items-center gap-3 text-base">
+                    <a href="#" class="hover:text-white transition-colors"><i class="fa-brands fa-twitter"></i></a>
+                    <a href="#" class="hover:text-white transition-colors"><i class="fa-brands fa-github"></i></a>
+                    <a href="#" class="hover:text-white transition-colors"><i class="fa-brands fa-linkedin"></i></a>
+                    <a href="#" class="hover:text-white transition-colors"><i class="fa-brands fa-instagram"></i></a>
+                </div>
+            </div>
+
+            <div class="space-y-3">
+                <h5 class="text-white font-bold text-sm tracking-wider uppercase" data-i18n="footer_links">Enlaces Rápidos</h5>
+                <ul class="space-y-2 text-xs">
+                    <li><a href="#inicio" class="hover:text-white transition-colors" data-i18n="nav_inicio">Inicio</a></li>
+                    <li><a href="#servicios" class="hover:text-white transition-colors" data-i18n="nav_servicios">Servicios</a></li>
+                    <li><a href="#portafolio" class="hover:text-white transition-colors" data-i18n="nav_portafolio">Portafolio</a></li>
+                    <li><a href="#nosotros" class="hover:text-white transition-colors" data-i18n="nav_nosotros">Nosotros</a></li>
+                </ul>
+            </div>
+
+            <div class="space-y-3">
+                <h5 class="text-white font-bold text-sm tracking-wider uppercase" data-i18n="footer_legal">Legal</h5>
+                <ul class="space-y-2 text-xs">
+                    <li><a href="#" onclick="showToast('Aviso Legal', 'Mostrando política de privacidad...')" class="hover:text-white transition-colors" data-i18n="footer_privacy">Política de Privacidad</a></li>
+                    <li><a href="#" onclick="showToast('Términos', 'Mostrando términos de servicio...')" class="hover:text-white transition-colors" data-i18n="footer_terms">Términos de Servicio</a></li>
+                    <li><a href="#" onclick="showToast('Cookies', 'Preferencias de cookies guardadas.')" class="hover:text-white transition-colors" data-i18n="footer_cookies">Política de Cookies</a></li>
+                </ul>
+            </div>
+
+            <div class="space-y-3">
+                <h5 class="text-white font-bold text-sm tracking-wider uppercase" data-i18n="footer_news">Boletín Informativo</h5>
+                <p class="text-xs text-slate-400" data-i18n="footer_news_desc">Suscríbete para recibir nuestras últimas novedades directamente en tu correo.</p>
+                <div class="flex gap-2">
+                    <input type="email" id="newsletter-email" placeholder="tu@correo.com" class="bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-indigo-600 w-full">
+                    <button onclick="handleNewsletter()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-xl text-xs font-semibold shrink-0" data-i18n="footer_btn_sub">Suscribir</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="max-w-7xl mx-auto px-6 pt-8 border-t border-slate-900 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500">
+            <p>© 2026 ModernUI. Todos los derechos reservados.</p>
+            <p class="mt-2 sm:mt-0" data-i18n="footer_crafted">Hecho con pasión para la web moderna.</p>
+        </div>
+    </footer>
+
+    <!-- 10. Lógica en JavaScript Completa (Traductor, Menú Móvil, Filtros) -->
+    <script>
+        // Diccionario de Traducciones (ES, EN, FR, DE)
+        const translations = {
+            es: {
+                nav_inicio: "Inicio",
+                nav_servicios: "Servicios",
+                nav_portafolio: "Portafolio",
+                nav_nosotros: "Nosotros",
+                nav_testimonios: "Testimonios",
+                nav_contacto: "Contacto",
+                nav_idioma: "Idioma",
+                btn_empezar: "Empezar Gratis",
+                hero_tag: "Líderes en desarrollo web moderno",
+                hero_title_1: "Transforma tu visión digital en",
+                hero_title_2: "realidad pura",
+                hero_desc: "Creamos experiencias web de alta gama, escalables y optimizadas para maximizar conversiones y cautivar a tu audiencia.",
+                hero_btn_primary: "Comenzar Proyecto",
+                hero_btn_secondary: "Ver Proyectos",
+                hero_feat_1: "Soporte 24/7",
+                hero_feat_2: "Garantía de rendimiento",
+                hero_code_status: "Compilado de manera óptima",
+                hero_stat_1: "Clientes Felices",
+                hero_stat_2: "Conversión",
+                serv_badge: "Nuestros Servicios",
+                serv_title: "Soluciones diseñadas para tu crecimiento digital",
+                serv_desc: "Combinamos diseño de vanguardia con ingeniería robusta para crear productos digitales excepcionales.",
+                serv_1_title: "Desarrollo Web Full-Stack",
+                serv_1_desc: "Aplicaciones web dinámicas y escalables creadas con tecnologías modernas de alto rendimiento.",
+                serv_2_title: "Diseño UI/UX Avanzado",
+                serv_2_desc: "Interfaces intuitivas y atractivas orientadas a enamorar a tus usuarios y elevar la retención.",
+                serv_3_title: "Optimización SEO y Velocidad",
+                serv_3_desc: "Posicionamiento en buscadores y tiempos de carga instantáneos para superar a tu competencia.",
+                serv_4_title: "Comercio Electrónico",
+                serv_4_desc: "Tiendas online robustas con pasarelas de pago seguras y gestión inteligente de inventarios.",
+                serv_5_title: "Apps Multiplataforma",
+                serv_5_desc: "Desarrollo móvil nativo y multiplataforma impecable tanto para iOS como para Android.",
+                serv_6_title: "Consultoría & Soporte",
+                serv_6_desc: "Asesoría tecnológica continua por parte de ingenieros expertos para garantizar el éxito de tu proyecto.",
+                port_badge: "Nuestro Trabajo",
+                port_title: "Proyectos recientes destacados",
+                port_desc: "Explora algunos de nuestros casos de éxito desarrollados para marcas líderes a nivel global.",
+                filter_all: "Todos",
+                filter_web: "Desarrollo Web",
+                filter_ui: "Diseño UI/UX",
+                filter_mobile: "Móvil",
+                about_badge: "Sobre Nosotros",
+                about_title: "Innovación, pasión y calidad sin compromisos",
+                about_desc: "Fundada en 2020, ModernUI reúne a un equipo multidisciplinario de ingenieros, diseñadores y estrategas digitales comprometidos con impulsar el éxito de empresas ambiciosas alrededor del mundo.",
+                about_stat_1: "Proyectos Exitosos",
+                about_stat_2: "Satisfacción Total",
+                about_val_1_title: "Misión",
+                about_val_1_desc: "Democratizar el acceso a tecnología web de nivel mundial para empresas de todos los tamaños.",
+                about_val_2_title: "Visión",
+                about_val_2_desc: "Ser el referente global en consultoría y desarrollo de experiencias web inmersivas.",
+                about_val_3_title: "Valores",
+                about_val_3_desc: "Transparencia radical, excelencia técnica y obsesión por la satisfacción del cliente.",
+                about_val_4_title: "Calidad",
+                about_val_4_desc: "Rigurosos estándares de pruebas y control de calidad en cada línea de código.",
+                test_badge: "Testimonios",
+                test_title: "Lo que dicen nuestros clientes",
+                test_desc: "Historias reales de éxito y transformación digital con nuestros servicios.",
+                test_1_text: "\"Trabajar con ModernUI ha sido un punto de inflexión para nuestra empresa. Nuestra nueva plataforma triplicó las conversiones en solo un mes.\"",
+                test_1_role: "CEO en FinTech Labs",
+                test_2_text: "\"La velocidad de entrega y la atención al detalle superaron todas nuestras expectativas. Recomiendo sus servicios al 100%.\"",
+                test_2_role: "Directora de Arte en ParisMedia",
+                test_3_text: "\"El soporte multilingüe y el diseño responsivo impecable nos permitieron expandirnos al mercado europeo sin fricciones técnicas.\"",
+                test_3_role: "CTO en Berlin Solutions",
+                cont_badge: "Contacto",
+                cont_title: "Hablemos sobre tu próximo gran proyecto",
+                cont_desc: "¿Tienes una idea en mente? Completa el formulario y uno de nuestros expertos se pondrá en contacto contigo en menos de 2 horas.",
+                cont_email_label: "Correo Electrónico",
+                cont_phone_label: "Teléfono",
+                cont_loc_label: "Ubicación",
+                form_name: "Nombre Completo",
+                form_email: "Correo Electrónico",
+                form_message: "Mensaje",
+                form_btn: "Enviar Mensaje",
+                footer_desc: "Construyendo el futuro de la web con diseño impecable y código de alto rendimiento.",
+                footer_links: "Enlaces Rápidos",
+                footer_legal: "Legal",
+                footer_privacy: "Política de Privacidad",
+                footer_terms: "Términos de Servicio",
+                footer_cookies: "Política de Cookies",
+                footer_news: "Boletín Informativo",
+                footer_news_desc: "Suscríbete para recibir nuestras últimas novedades directamente en tu correo.",
+                footer_btn_sub: "Suscribir",
+                footer_crafted: "Hecho con pasión para la web moderna."
+            },
+            en: {
+                nav_inicio: "Home",
+                nav_servicios: "Services",
+                nav_portafolio: "Portfolio",
+                nav_nosotros: "About Us",
+                nav_testimonios: "Testimonials",
+                nav_contacto: "Contact",
+                nav_idioma: "Language",
+                btn_empezar: "Get Started Free",
+                hero_tag: "Leaders in modern web development",
+                hero_title_1: "Transform your digital vision into",
+                hero_title_2: "pure reality",
+                hero_desc: "We create high-end, scalable web experiences optimized to maximize conversions and captivate your audience.",
+                hero_btn_primary: "Start Project",
+                hero_btn_secondary: "View Projects",
+                hero_feat_1: "24/7 Support",
+                hero_feat_2: "Performance Guarantee",
+                hero_code_status: "Optimally compiled",
+                hero_stat_1: "Happy Clients",
+                hero_stat_2: "Conversion",
+                serv_badge: "Our Services",
+                serv_title: "Solutions designed for your digital growth",
+                serv_desc: "We combine cutting-edge design with robust engineering to build exceptional digital products.",
+                serv_1_title: "Full-Stack Web Development",
+                serv_1_desc: "Dynamic, scalable web applications built with high-performance modern technologies.",
+                serv_2_title: "Advanced UI/UX Design",
+                serv_2_desc: "Intuitive, engaging interfaces designed to delight your users and boost retention.",
+                serv_3_title: "SEO & Speed Optimization",
+                serv_3_desc: "Search engine ranking and instant load times to outperform your competitors.",
+                serv_4_title: "E-Commerce",
+                serv_4_desc: "Robust online stores with secure payment gateways and smart inventory management.",
+                serv_5_title: "Cross-Platform Apps",
+                serv_5_desc: "Flawless native and cross-platform mobile development for both iOS and Android.",
+                serv_6_title: "Consulting & Support",
+                serv_6_desc: "Continuous technological consulting from expert engineers to ensure project success.",
+                port_badge: "Our Work",
+                port_title: "Recent featured projects",
+                port_desc: "Explore some of our success stories developed for leading global brands.",
+                filter_all: "All",
+                filter_web: "Web Dev",
+                filter_ui: "UI/UX Design",
+                filter_mobile: "Mobile",
+                about_badge: "About Us",
+                about_title: "Innovation, passion and uncompromising quality",
+                about_desc: "Founded in 2020, ModernUI brings together a multidisciplinary team of engineers, designers, and digital strategists committed to driving the success of ambitious companies worldwide.",
+                about_stat_1: "Successful Projects",
+                about_stat_2: "Total Satisfaction",
+                about_val_1_title: "Mission",
+                about_val_1_desc: "Democratize access to world-class web technology for companies of all sizes.",
+                about_val_2_title: "Vision",
+                about_val_2_desc: "Be the global benchmark in consulting and development of immersive web experiences.",
+                about_val_3_title: "Values",
+                about_val_3_desc: "Radical transparency, technical excellence, and obsession with customer satisfaction.",
+                about_val_4_title: "Quality",
+                about_val_4_desc: "Rigorous testing standards and quality control in every line of code.",
+                test_badge: "Testimonials",
+                test_title: "What our clients say",
+                test_desc: "Real stories of success and digital transformation with our services.",
+                test_1_text: "\"Working with ModernUI has been a turning point for our company. Our new platform tripled conversions in just one month.\"",
+                test_1_role: "CEO at FinTech Labs",
+                test_2_text: "\"Delivery speed and attention to detail exceeded all our expectations. I recommend their services 100%.\"",
+                test_2_role: "Art Director at ParisMedia",
+                test_3_text: "\"Multilingual support and flawless responsive design allowed us to expand into the European market without technical friction.\"",
+                test_3_role: "CTO at Berlin Solutions",
+                cont_badge: "Contact",
+                cont_title: "Let's talk about your next big project",
+                cont_desc: "Have an idea in mind? Fill out the form and one of our experts will contact you in under 2 hours.",
+                cont_email_label: "Email Address",
+                cont_phone_label: "Phone",
+                cont_loc_label: "Location",
+                form_name: "Full Name",
+                form_email: "Email Address",
+                form_message: "Message",
+                form_btn: "Send Message",
+                footer_desc: "Building the future of the web with flawless design and high-performance code.",
+                footer_links: "Quick Links",
+                footer_legal: "Legal",
+                footer_privacy: "Privacy Policy",
+                footer_terms: "Terms of Service",
+                footer_cookies: "Cookie Policy",
+                footer_news: "Newsletter",
+                footer_news_desc: "Subscribe to receive our latest updates directly in your inbox.",
+                footer_btn_sub: "Subscribe",
+                footer_crafted: "Crafted with passion for the modern web."
+            },
+            fr: {
+                nav_inicio: "Accueil",
+                nav_servicios: "Services",
+                nav_portafolio: "Portfolio",
+                nav_nosotros: "À propos",
+                nav_testimonios: "Témoignages",
+                nav_contacto: "Contact",
+                nav_idioma: "Langue",
+                btn_empezar: "Commencer Gratuitement",
+                hero_tag: "Leaders du développement web moderne",
+                hero_title_1: "Transformez votre vision numérique en",
+                hero_title_2: "pure réalité",
+                hero_desc: "Nous créons des expériences web haut de gamme, évolutives et optimisées pour maximiser les conversions et captiver votre public.",
+                hero_btn_primary: "Démarrer le Projet",
+                hero_btn_secondary: "Voir les Projets",
+                hero_feat_1: "Support 24/7",
+                hero_feat_2: "Garantie de performance",
+                hero_code_status: "Compilé de manière optimale",
+                hero_stat_1: "Clients Heureux",
+                hero_stat_2: "Conversion",
+                serv_badge: "Nos Services",
+                serv_title: "Solutions conçues pour votre croissance numérique",
+                serv_desc: "Nous combinons un design de pointe avec une ingénierie robuste pour créer des produits numériques d'exception.",
+                serv_1_title: "Développement Web Full-Stack",
+                serv_1_desc: "Applications web dynamiques et évolutives créées avec des technologies modernes hautes performances.",
+                serv_2_title: "Design UI/UX Avancé",
+                serv_2_desc: "Interfaces intuitives et attrayantes conçues pour ravir vos utilisateurs et stimuler la rétention.",
+                serv_3_title: "Optimisation SEO et Vitesse",
+                serv_3_desc: "Classement dans les moteurs de recherche et temps de chargement instantanés pour surpasser vos concurrents.",
+                serv_4_title: "E-Commerce",
+                serv_4_desc: "Boutiques en ligne robustes avec passerelles de paiement sécurisées et gestion intelligente des stocks.",
+                serv_5_title: "Applications Multiplateformes",
+                serv_5_desc: "Développement mobile natif et multiplateforme impeccable pour iOS et Android.",
+                serv_6_title: "Conseil & Support",
+                serv_6_desc: "Conseil technologique continu par des ingénieurs experts pour assurer le succès de votre projet.",
+                port_badge: "Notre Travail",
+                port_title: "Projets récents en vedette",
+                port_desc: "Explorez quelques-unes de nos réussites développées pour des marques mondiales de premier plan.",
+                filter_all: "Tous",
+                filter_web: "Développement Web",
+                filter_ui: "Design UI/UX",
+                filter_mobile: "Mobile",
+                about_badge: "À Propos",
+                about_title: "Innovation, passion et qualité sans compromis",
+                about_desc: "Fondée en 2020, ModernUI réunit une équipe pluridisciplinaire d'ingénieurs, de designers et de stratèges numériques déterminés à stimuler la réussite d'entreprises ambitieuses.",
+                about_stat_1: "Projets Réussis",
+                about_stat_2: "Satisfaction Totale",
+                about_val_1_title: "Mission",
+                about_val_1_desc: "Démocratiser l'accès à une technologie web de classe mondiale pour les entreprises de toutes tailles.",
+                about_val_2_title: "Vision",
+                about_val_2_desc: "Être la référence mondiale en conseil et développement d'expériences web immersives.",
+                about_val_3_title: "Valeurs",
+                about_val_3_desc: "Transparence radicale, excellence technique et obsession de la satisfaction client.",
+                about_val_4_title: "Qualité",
+                about_val_4_desc: "Normes de tests rigoureuses et contrôle qualité à chaque ligne de code.",
+                test_badge: "Témoignages",
+                test_title: "Ce que disent nos clients",
+                test_desc: "De véritables histoires de réussite et de transformation numérique avec nos services.",
+                test_1_text: "\"Travailler avec ModernUI a été un tournant pour notre entreprise. Notre nouvelle plateforme a triplé les conversions en un mois seulement.\"",
+                test_1_role: "PDG chez FinTech Labs",
+                test_2_text: "\"La vitesse de livraison et le souci du détail ont dépassé toutes nos attentes. Je recommande leurs services à 100%.\"",
+                test_2_role: "Directrice Artistique chez ParisMedia",
+                test_3_text: "\"Le support multilingue et le design réactif impeccable nous ont permis de nous étendre sur le marché européen sans friction technique.\"",
+                test_3_role: "CTO chez Berlin Solutions",
+                cont_badge: "Contact",
+                cont_title: "Parlons de votre prochain grand projet",
+                cont_desc: "Vous avez une idée en tête ? Remplissez le formulaire et l'un de nos experts vous contactera en moins de 2 heures.",
+                cont_email_label: "Adresse e-mail",
+                cont_phone_label: "Téléphone",
+                cont_loc_label: "Emplacement",
+                form_name: "Nom complet",
+                form_email: "Adresse e-mail",
+                form_message: "Message",
+                form_btn: "Envoyer le Message",
+                footer_desc: "Construire l'avenir du web avec un design impeccable et du code haute performance.",
+                footer_links: "Liens Rapides",
+                footer_legal: "Légal",
+                footer_privacy: "Politique de Confidentialité",
+                footer_terms: "Conditions d'Utilisation",
+                footer_cookies: "Politique de Cookies",
+                footer_news: "Newsletter",
+                footer_news_desc: "Abonnez-vous pour recevoir nos dernières actualités directement dans votre boîte de réception.",
+                footer_btn_sub: "S'abonner",
+                footer_crafted: "Créé avec passion pour le web moderne."
+            },
+            de: {
+                nav_inicio: "Startseite",
+                nav_servicios: "Dienstleistungen",
+                nav_portafolio: "Portfolio",
+                nav_nosotros: "Über Uns",
+                nav_testimonios: "Referenzen",
+                nav_contacto: "Kontakt",
+                nav_idioma: "Sprache",
+                btn_empezar: "Kostenlos Starten",
+                hero_tag: "Führend in der modernen Webentwicklung",
+                hero_title_1: "Verwandeln Sie Ihre digitale Vision in",
+                hero_title_2: "reine Realität",
+                hero_desc: "Wir entwickeln High-End-Weberlebnisse, die skalierbar und optimiert sind, um Conversions zu maximieren und Ihr Publikum zu begeistern.",
+                hero_btn_primary: "Projekt Starten",
+                hero_btn_secondary: "Projekte Ansehen",
+                hero_feat_1: "24/7 Support",
+                hero_feat_2: "Leistungsgarantie",
+                hero_code_status: "Optimal kompiliert",
+                hero_stat_1: "Zufriedene Kunden",
+                hero_stat_2: "Konversion",
+                serv_badge: "Unsere Dienstleistungen",
+                serv_title: "Lösungen für Ihr digitales Wachstum",
+                serv_desc: "Wir kombinieren modernstes Design mit robuster Technik, um außergewöhnliche digitale Produkte zu entwickeln.",
+                serv_1_title: "Full-Stack Webentwicklung",
+                serv_1_desc: "Dynamische und skalierbare Webanwendungen, erstellt mit modernen Hochleistungstechnologien.",
+                serv_2_title: "Fortgeschrittenes UI/UX Design",
+                serv_2_desc: "Intuitive und ansprechende Benutzeroberflächen zur Begeisterung Ihrer Nutzer.",
+                serv_3_title: "SEO & Geschwindigkeitsoptimierung",
+                serv_3_desc: "Suchmaschinenranking und sofortige Ladezeiten, um Ihre Konkurrenz zu übertreffen.",
+                serv_4_title: "E-Commerce",
+                serv_4_desc: "Robuste Online-Shops mit sicheren Zahlungs-Gateways und intelligentem Bestandsmanagement.",
+                serv_5_title: "Plattformübergreifende Apps",
+                serv_5_desc: "Makellose native und plattformübergreifende mobile Entwicklung für iOS und Android.",
+                serv_6_title: "Beratung & Support",
+                serv_6_desc: "Kontinuierliche Technologieberatung durch erfahrene Ingenieure für Ihren Projekterfolg.",
+                port_badge: "Unsere Arbeit",
+                port_title: "Aktuelle ausgewählte Projekte",
+                port_desc: "Entdecken Sie einige unserer Erfolgsgeschichten, die für führende Weltmarken entwickelt wurden.",
+                filter_all: "Alle",
+                filter_web: "Webentwicklung",
+                filter_ui: "UI/UX Design",
+                filter_mobile: "Mobil",
+                about_badge: "Über Uns",
+                about_title: "Innovation, Leidenschaft und kompromisslose Qualität",
+                about_desc: "Gegründet im Jahr 2020 vereint ModernUI ein multidisziplinäres Team aus Ingenieuren, Designern und digitalen Strategen.",
+                about_stat_1: "Erfolgreiche Projekte",
+                about_stat_2: "Totale Zufriedenheit",
+                about_val_1_title: "Mission",
+                about_val_1_desc: "Demokratisierung des Zugangs zu erstklassiger Webtechnologie für Unternehmen jeder Größe.",
+                about_val_2_title: "Vision",
+                about_val_2_desc: "Die globale Referenz für Beratung und Entwicklung immersiver Weberlebnisse sein.",
+                about_val_3_title: "Werte",
+                about_val_3_desc: "Radikale Transparenz, technische Exzellenz und Obsession für Kundenzufriedenheit.",
+                about_val_4_title: "Qualität",
+                about_val_4_desc: "Strengste Teststandards und Qualitätskontrolle in jeder Codezeile.",
+                test_badge: "Referenzen",
+                test_title: "Was unsere Kunden sagen",
+                test_desc: "Echte Erfolgsgeschichten und digitale Transformation mit unseren Dienstleistungen.",
+                test_1_text: "\"Die Zusammenarbeit mit ModernUI war ein Wendepunkt für unser Unternehmen. Unsere neue Plattform hat die Conversions in nur einem Monat verdreifacht.\"",
+                test_1_role: "CEO bei FinTech Labs",
+                test_2_text: "\"Liefergeschwindigkeit und Detailgenauigkeit haben alle Erwartungen übertroffen. Ich empfehle ihre Dienste zu 100% weiter.\"",
+                test_2_role: "Art Director bei ParisMedia",
+                test_3_text: "\"Der mehrsprachige Support und das makellose responsive Design ermöglichten uns die reibungslose Expansion in den europäischen Markt.\"",
+                test_3_role: "CTO bei Berlin Solutions",
+                cont_badge: "Kontakt",
+                cont_title: "Lassen Sie uns über Ihr nächstes Großprojekt sprechen",
+                cont_desc: "Haben Sie eine Idee im Kopf? Füllen Sie das Formular aus und einer unserer Experten meldet sich in weniger als 2 Stunden.",
+                cont_email_label: "E-Mail-Adresse",
+                cont_phone_label: "Telefon",
+                cont_loc_label: "Standort",
+                form_name: "Vollständiger Name",
+                form_email: "E-Mail-Adresse",
+                form_message: "Nachricht",
+                form_btn: "Nachricht Senden",
+                footer_desc: "Wir gestalten die Zukunft des Webs mit makellosem Design und Hochleistungscode.",
+                footer_links: "Schnelllinks",
+                footer_legal: "Rechtliches",
+                footer_privacy: "Datenschutzrichtlinie",
+                footer_terms: "Nutzungsbedingungen",
+                footer_cookies: "Cookie-Richtlinie",
+                footer_news: "Newsletter",
+                footer_news_desc: "Abonnieren Sie unseren Newsletter für die neuesten Updates direkt in Ihrem Posteingang.",
+                footer_btn_sub: "Abonnieren",
+                footer_crafted: "Mit Leidenschaft für das moderne Web entwickelt."
+            }
+        };
+
+        // Función para cambiar idioma en tiempo real
+        function changeLanguage(lang) {
+            const elements = document.querySelectorAll('[data-i18n]');
+            elements.forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (translations[lang] && translations[lang][key]) {
+                    el.textContent = translations[lang][key];
+                }
+            });
+
+            // Actualizar selects sincronizados
+            document.getElementById('language-selector').value = lang;
+            document.getElementById('mobile-language-selector').value = lang;
+            document.getElementById('html-root').setAttribute('lang', lang);
+        }
+
+        // Sistema de Notificaciones Toast (reemplazo seguro para alert)
+        function showToast(title, msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-title').textContent = title;
+            document.getElementById('toast-msg').textContent = msg;
+
+            toast.classList.remove('translate-y-32', 'opacity-0');
+            setTimeout(() => {
+                toast.classList.add('translate-y-32', 'opacity-0');
+            }, 3500);
+        }
+
+        // Manejador del menú móvil
+        const menuBtn = document.getElementById('menu-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+
+        function toggleMobileMenu() {
+            mobileMenu.classList.toggle('hidden');
+        }
+
+        menuBtn.addEventListener('click', toggleMobileMenu);
+
+        // Lógica de filtrado de proyectos del portafolio
+        function filterProjects(category) {
+            const buttons = document.querySelectorAll('.filter-btn');
+            buttons.forEach(btn => {
+                btn.classList.remove('bg-indigo-600', 'text-white', 'shadow-md');
+                btn.classList.add('bg-white', 'text-slate-700', 'border', 'border-slate-200');
+            });
+
+            event.target.classList.remove('bg-white', 'text-slate-700', 'border', 'border-slate-200');
+            event.target.classList.add('bg-indigo-600', 'text-white', 'shadow-md');
+
+            const cards = document.querySelectorAll('.project-card');
+            cards.forEach(card => {
+                const cat = card.getAttribute('data-category');
+                if (category === 'all' || cat === category) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+
+        // Envío simulado del formulario de contacto
+        function handleContactSubmit(e) {
+            e.preventDefault();
+            const name = document.getElementById('form-name').value;
+            showToast('¡Mensaje enviado!', `Gracias ${name}, nos pondremos en contacto contigo pronto.`);
+            e.target.reset();
+        }
+
+        // Envío simulado del boletín newsletter
+        function handleNewsletter() {
+            const email = document.getElementById('newsletter-email').value;
+            if (email) {
+                showToast('¡Suscripción exitosa!', 'Te has suscrito correctamente a nuestro boletín.');
+                document.getElementById('newsletter-email').value = '';
+            } else {
+                showToast('Aviso', 'Por favor ingresa un correo válido.');
+            }
+        }
+    </script>
+</body>
+</html>
